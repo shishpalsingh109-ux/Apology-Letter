@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { Heart, Frown, CheckCircle, MessageCircle } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { Heart, Frown, CheckCircle, MessageCircle, Volume2, VolumeX } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [animationState, setAnimationState] = useState<'idle' | 'happy' | 'sad'>('idle');
   const [isCompleted, setIsCompleted] = useState(false);
+  const [isMuted, setIsMuted] = useState(false); // Track if user manually muted or browser blocked
   
   // Generate random configuration for floating hearts once
   const floatingHearts = useMemo(() => {
@@ -50,18 +51,26 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-[#f0f9ff] p-4 md:p-8 relative flex flex-col items-center overflow-x-hidden">
       
-      {/* Background Music - Hidden YouTube Iframe */}
-      {/* We use a 1px opacity-0 div instead of display:none to encourage browser to render and play */}
-      <div className="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none -z-10 overflow-hidden">
+      {/* Background Music - Off-screen YouTube Iframe for better autoplay support */}
+      <div className="fixed top-0 left-0 w-1 h-1 pointer-events-none -z-10" style={{ left: '-9999px' }}>
         <iframe 
           width="100%" 
           height="100%" 
-          src="https://www.youtube.com/embed/_mwqXnTEHSc?autoplay=1&loop=1&playlist=_mwqXnTEHSc&controls=0&start=0" 
+          src={`https://www.youtube.com/embed/_mwqXnTEHSc?autoplay=1&mute=${isMuted ? 1 : 0}&loop=1&playlist=_mwqXnTEHSc&controls=0&start=0`}
           title="Background Music" 
           allow="autoplay; encrypted-media"
           frameBorder="0"
         ></iframe>
       </div>
+
+      {/* Minimal Audio Status/Toggle (Fallback if autoplay blocked) */}
+      <button 
+        onClick={() => setIsMuted(!isMuted)}
+        className="fixed top-4 right-4 z-40 p-2 text-slate-400 hover:text-slate-600 transition-colors opacity-50 hover:opacity-100"
+        title={isMuted ? "Unmute Music" : "Mute Music"}
+      >
+        {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
+      </button>
 
       {/* Happy Animation - Floating Hearts */}
       {animationState === 'happy' && (
