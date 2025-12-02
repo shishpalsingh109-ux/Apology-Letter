@@ -1,15 +1,11 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { Heart, Frown, CheckCircle, Music, Pause, Play } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Heart, Frown, CheckCircle, MessageCircle } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [currentQIndex, setCurrentQIndex] = useState(0);
   const [animationState, setAnimationState] = useState<'idle' | 'happy' | 'sad'>('idle');
   const [isCompleted, setIsCompleted] = useState(false);
   
-  // Music state
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
   // Generate random configuration for floating hearts once
   const floatingHearts = useMemo(() => {
     return Array.from({ length: 20 }).map((_, i) => ({
@@ -51,46 +47,21 @@ const Home: React.FC = () => {
     }
   };
 
-  const toggleMusic = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        const playPromise = audioRef.current.play();
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.log("Playback failed (browser might require user interaction):", error);
-          });
-        }
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#f0f9ff] p-4 md:p-8 relative flex flex-col items-center overflow-x-hidden">
       
-      {/* Background Audio with Cross-Browser Support */}
-      <audio ref={audioRef} loop crossOrigin="anonymous">
-        {/* MP3 for Safari/iOS */}
-        <source src="https://upload.wikimedia.org/wikipedia/commons/transcoded/e/e4/Gymnopedie_No_1.ogg/Gymnopedie_No_1.ogg.mp3" type="audio/mpeg" />
-        {/* OGG for others */}
-        <source src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Gymnopedie_No_1.ogg" type="audio/ogg" />
-        Your browser does not support the audio element.
-      </audio>
-
-      {/* Music Control Button */}
-      <button 
-        onClick={toggleMusic}
-        className="fixed top-4 right-4 z-40 flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-full shadow-sm text-slate-600 hover:bg-white hover:text-slate-800 transition-all duration-300 group"
-      >
-        {isPlaying ? (
-          <Pause size={18} className="fill-slate-600" />
-        ) : (
-          <Play size={18} className="fill-slate-600 ml-0.5" />
-        )}
-        <span className="text-sm font-medium">{isPlaying ? 'Pause Music' : 'Play Music'}</span>
-      </button>
+      {/* Background Music - Hidden YouTube Iframe */}
+      {/* We use a 1px opacity-0 div instead of display:none to encourage browser to render and play */}
+      <div className="fixed top-0 left-0 w-1 h-1 opacity-0 pointer-events-none -z-10 overflow-hidden">
+        <iframe 
+          width="100%" 
+          height="100%" 
+          src="https://www.youtube.com/embed/_mwqXnTEHSc?autoplay=1&loop=1&playlist=_mwqXnTEHSc&controls=0&start=0" 
+          title="Background Music" 
+          allow="autoplay; encrypted-media"
+          frameBorder="0"
+        ></iframe>
+      </div>
 
       {/* Happy Animation - Floating Hearts */}
       {animationState === 'happy' && (
@@ -257,7 +228,7 @@ const Home: React.FC = () => {
               </div>
             </div>
           ) : (
-            <div className="text-center animate-in zoom-in duration-500 space-y-6">
+            <div className="text-center animate-in zoom-in duration-500 space-y-6 flex flex-col items-center">
               <div className="inline-flex items-center justify-center w-20 h-20 bg-green-100 rounded-full mb-2 shadow-sm">
                 <CheckCircle className="w-10 h-10 text-green-600" />
               </div>
@@ -265,6 +236,16 @@ const Home: React.FC = () => {
                 <h3 className="text-3xl font-serif text-slate-800 font-bold mb-2">Thank you!</h3>
                 <p className="text-slate-500">I promise to be better.</p>
               </div>
+              
+              <a 
+                href="https://wa.me/918570069686?text=I%20forgive%20you"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 px-8 py-3 bg-[#25D366] text-white rounded-full font-medium text-lg hover:bg-[#128C7E] shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 mt-6"
+              >
+                <MessageCircle size={20} />
+                Send Message on WhatsApp
+              </a>
             </div>
           )}
         </div>
